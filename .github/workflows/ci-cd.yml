@@ -7,42 +7,30 @@ on:
     branches: [ "master", "main" ]
 
 jobs:
-  build-test-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Source Code Checkout
-      - name: Checkout Repository Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Code Validation / Linting (Build Preparation)
-      - name: Validate HTML Structure
+      - name: Validate Source Files
         run: |
           echo "=== Testing & Validating Code ==="
           test -f index.html || (echo "index.html missing!" && exit 1)
           test -f style.css || (echo "style.css missing!" && exit 1)
-          echo "All critical source files verified successfully."
+          echo "All source files verified successfully."
 
-      # 3. Packaging Step
-      - name: Package Application Artifacts
+      - name: Package Application
         run: |
           echo "=== Packaging Application ==="
           mkdir -p dist
           cp index.html style.css dist/
-          tar -czvf food-delivery-app-v1.0.tar.gz -C dist .
-          echo "Package created: food-delivery-app-v1.0.tar.gz"
+          tar -czvf food-delivery-app.tar.gz -C dist .
+          echo "Package created: food-delivery-app.tar.gz"
 
-      # 4. Upload Build Artifacts
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: food-delivery-app-build
-          path: food-delivery-app-v1.0.tar.gz
-
-      # 5. Automated Deployment (GitHub Pages)
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          path: food-delivery-app.tar.gz
